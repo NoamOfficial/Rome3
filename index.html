@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roman Empire Timeline SVG Map</title>
+<style>
+  body { font-family:sans-serif; text-align:center; }
+  svg { width:90%; height:auto; border:1px solid #ccc; background:#eef; }
+  .polygon { opacity:0.6; stroke:black; stroke-width:1; }
+  #sliderContainer { margin:10px; }
+  #infoBox { margin:5px; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<h2>Roman Empire Timeline Map</h2>
+<div id="sliderContainer">
+  <input type="range" min="-800" max="1453" step="1" value="-800" id="yearSlider">
+  <span id="yearLabel">800 BCE</span>
+</div>
+<div id="infoBox">Etruscan civilization</div>
+
+<svg id="map" viewBox="0 0 1000 600">
+  <!-- Roman Empire Polygon -->
+  <polygon id="roman" class="polygon" fill="purple" points="0,0"></polygon>
+  <!-- Other civilizations -->
+  <polygon id="carthage" class="polygon" fill="brown" points="0,0"></polygon>
+  <polygon id="gauls" class="polygon" fill="green" points="0,0"></polygon>
+  <polygon id="parthians" class="polygon" fill="orange" points="0,0"></polygon>
+  <polygon id="gallic" class="polygon" fill="darkblue" points="0,0"></polygon>
+  <!-- Battle markers -->
+  <circle id="battle" cx="0" cy="0" r="5" fill="red" visibility="hidden"></circle>
+</svg>
+
+<script>
+const romanData = [
+  {year:-800, points:"420,180 430,200 400,220 390,200", info:"Etruscans (~800 BCE)"},
+  {year:-500, points:"400,200 420,220 390,230 380,210", info:"Early Rome (~500 BCE)"},
+  {year:-200, points:"350,150 500,300 400,350 300,250", info:"Roman Republic (509–27 BCE), Punic Wars"},
+  {year:100, points:"100,100 900,500 700,500 300,150", info:"Roman Empire peak (~117 CE)"},
+  {year:300, points:"100,100 900,500 700,500 300,150", info:"Crisis of 3rd Century (270 CE)"},
+  {year:500, points:"200,200 800,400 700,400 300,200", info:"Western collapse, Eastern survives"},
+  {year:1000, points:"300,300 700,500 600,500 300,300", info:"Byzantine recovery"},
+  {year:1453, points:"300,300 700,500 600,500 300,300", info:"Fall of Constantinople"}
+];
+
+const civs = {
+  carthage:{start:-500,end:-146,points:"360,380 370,360 350,360 340,380"},
+  gauls:{start:-600,end:-50,points:"460,100 500,150 450,160 430,120"},
+  parthians:{start:-247,end:224,points:"700,200 800,100 850,150 750,250"},
+  gallic:{start:260,end:274,points:"430,120 500,150 510,130 450,110"}
+};
+
+const battles = [
+  {year:-216, x:413, y:215, name:"Battle of Cannae"},
+  {year:-202, x:370, y:140, name:"Battle of Zama"},
+  {year:-89, x:404, y:142, name:"Social War"},
+  {year:30, x:312, y:299, name:"Roman annexation of Egypt"},
+  {year:1453, x:410, y:289, name:"Fall of Constantinople"}
+];
+
+const romanPoly = document.getElementById("roman");
+const carthagePoly = document.getElementById("carthage");
+const gaulsPoly = document.getElementById("gauls");
+const parthiansPoly = document.getElementById("parthians");
+const gallicPoly = document.getElementById("gallic");
+const battleMarker = document.getElementById("battle");
+const infoBox = document.getElementById("infoBox");
+const yearLabel = document.getElementById("yearLabel");
+
+function updateMap(year){
+  // Update Roman polygon
+  let closest = romanData.reduce((a,b)=>Math.abs(b.year-year)<Math.abs(a.year-year)?b:a);
+  romanPoly.setAttribute("points", closest.points);
+  infoBox.innerHTML = closest.info;
+
+  // Civs visibility
+  carthagePoly.setAttribute("points", year>=civs.carthage.start && year<=civs.carthage.end ? civs.carthage.points:"0,0");
+  gaulsPoly.setAttribute("points", year>=civs.gauls.start && year<=civs.gauls.end ? civs.gauls.points:"0,0");
+  parthiansPoly.setAttribute("points", year>=civs.parthians.start && year<=civs.parthians.end ? civs.parthians.points:"0,0");
+  gallicPoly.setAttribute("points", year>=civs.gallic.start && year<=civs.gallic.end ? civs.gallic.points:"0,0");
+
+  // Battles
+  let battle = battles.find(b=>Math.abs(b.year-year)<=5);
+  if(battle){
+    battleMarker.setAttribute("cx",battle.x);
+    battleMarker.setAttribute("cy",battle.y);
+    battleMarker.setAttribute("visibility","visible");
+    battleMarker.setAttribute("title",battle.name);
+  }else{
+    battleMarker.setAttribute("visibility","hidden");
+  }
+
+  yearLabel.textContent = year<0?`${Math.abs(year)} BCE`:`${year} CE`;
+}
+
+const slider = document.getElementById("yearSlider");
+slider.addEventListener("input",()=>updateMap(parseInt(slider.value)));
+
+// Initial
+updateMap(parseInt(slider.value));
+</script>
+
+</body>
+</html>
